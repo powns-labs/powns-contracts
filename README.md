@@ -1,66 +1,123 @@
-## Foundry
+# PoWNS Contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contracts for PoW Name Service - a decentralized naming system where domain scarcity is determined by computational work, not capital.
 
-Foundry consists of:
+## Contracts
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+| Contract                 | Description                                                     |
+| ------------------------ | --------------------------------------------------------------- |
+| `PoWNSRegistry`          | Core registry - domain registration, renewal, release (ERC-721) |
+| `PoWNSVerifier`          | SHA256 PoW verification with miner address binding              |
+| `DifficultyManager`      | Dark Gravity Wave difficulty adjustment algorithm               |
+| `PoWNSResolver`          | Address, text, and contenthash resolution                       |
+| `BountyVault`            | Outsourced mining bounty market                                 |
+| `POWNSToken`             | Native $POWNS ERC-20 token with mining rewards                  |
+| `POWNSStaking`           | Stake tokens for revenue sharing and voting power               |
+| `ProtocolFeeDistributor` | 50% stakers / 30% DAO / 20% burn                                |
+| `Marketplace`            | Domain trading - fixed price, auction, offers                   |
+| `DomainLeasing`          | Rent out resolver control                                       |
+| `TeamVesting`            | 1-year cliff + 3-year linear vesting                            |
 
-## Documentation
+## Architecture
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         User / Miner                            │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+┌───────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│ PoWNSRegistry │◄────│  PoWNSVerifier  │     │   BountyVault   │
+│   (ERC-721)   │     │    (SHA256)     │     │(Mining Bounties)│
+└───────┬───────┘     └─────────────────┘     └─────────────────┘
+        │
+        ├──────────────────────────────────────┐
+        ▼                                      ▼
+┌───────────────┐                    ┌─────────────────┐
+│PoWNSResolver  │                    │   POWNSToken    │
+│(Addr/Text/CID)│                    │    (ERC-20)     │
+└───────────────┘                    └────────┬────────┘
+                                              │
+        ┌─────────────────────────────────────┼─────────────────┐
+        ▼                                     ▼                 ▼
+┌───────────────┐                    ┌───────────────┐ ┌───────────────┐
+│  Marketplace  │                    │ POWNSStaking  │ │  TeamVesting  │
+│(Trade Domains)│                    │(Revenue Share)│ │(Team Tokens)  │
+└───────────────┘                    └───────┬───────┘ └───────────────┘
+                                             │
+                                             ▼
+                                    ┌─────────────────┐
+                                    │FeeDistributor   │
+                                    │50%/30%/20%      │
+                                    └─────────────────┘
 ```
 
-### Test
+## Build
 
-```shell
-$ forge test
+```bash
+# Install dependencies
+forge install
+
+# Build
+forge build
+
+# Test
+forge test
+
+# Test with verbosity
+forge test -vvv
 ```
 
-### Format
+## Deploy
 
-```shell
-$ forge fmt
+```bash
+# Set environment
+export PRIVATE_KEY=your_private_key
+export RPC_URL=your_rpc_url
+
+# Deploy all contracts
+forge script script/Deploy.s.sol:DeployPoWNS --rpc-url $RPC_URL --broadcast
 ```
 
-### Gas Snapshots
+## Test Results
 
-```shell
-$ forge snapshot
+```
+Running 20 tests
+✅ test_ComputeHash
+✅ test_DifficultyBits
+✅ test_DifficultyBitsCharset
+✅ test_DomainAuction
+✅ test_DomainExpired
+✅ test_DomainState
+✅ test_InitialState
+✅ test_InsufficientDeposit
+✅ test_NameValidation
+✅ test_RegisterDomain
+✅ test_RegisterMultipleYears
+✅ test_ReleaseDomain
+✅ test_Target
+✅ test_TransferDomain
+✅ test_ValidNameChars
+✅ test_VerifyPoW
+✅ test_VerifyPoWFails
+✅ test_CannotRegisterTwice
+✅ test_CannotReleaseIfNotOwner
+✅ test_CannotTransferIfNotOwner
+
+20 passed, 0 failed
 ```
 
-### Anvil
+## Token Economics
 
-```shell
-$ anvil
-```
+| Allocation         | Percentage | Amount |
+| ------------------ | ---------- | ------ |
+| PoW Mining         | 40%        | 400M   |
+| DAO Treasury       | 25%        | 250M   |
+| Team (4yr vest)    | 15%        | 150M   |
+| Early Contributors | 10%        | 100M   |
+| Liquidity          | 10%        | 100M   |
 
-### Deploy
+## License
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+MIT
