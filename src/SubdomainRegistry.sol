@@ -253,7 +253,7 @@ contract SubdomainRegistry is Ownable, ReentrancyGuard {
         uint256 parentTokenId,
         string calldata label,
         uint256 coinType,
-        bytes calldata addr
+        bytes calldata addrData
     ) external {
         bytes32 labelHash = keccak256(bytes(label));
         Subdomain storage subdomain = subdomains[parentTokenId][labelHash];
@@ -264,7 +264,7 @@ contract SubdomainRegistry is Ownable, ReentrancyGuard {
         bytes32 fullNameHash = keccak256(
             abi.encodePacked(label, ".", parentTokenId)
         );
-        _addresses[fullNameHash][coinType] = addr;
+        _addresses[fullNameHash][coinType] = addrData;
     }
 
     function addr(

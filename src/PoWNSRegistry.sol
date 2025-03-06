@@ -140,7 +140,10 @@ contract PoWNSRegistry is
 
         // Refund excess
         if (msg.value > requiredDeposit) {
-            payable(msg.sender).transfer(msg.value - requiredDeposit);
+            (bool success, ) = payable(msg.sender).call{
+                value: msg.value - requiredDeposit
+            }("");
+            require(success, "Refund failed");
         }
 
         emit DomainRegistered(
@@ -244,7 +247,8 @@ contract PoWNSRegistry is
 
         // Transfer refund
         if (refund > 0) {
-            payable(msg.sender).transfer(refund);
+            (bool success, ) = payable(msg.sender).call{value: refund}("");
+            require(success, "Refund failed");
         }
 
         emit DomainReleased(name, name, msg.sender, refund);
