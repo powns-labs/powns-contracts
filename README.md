@@ -20,37 +20,34 @@ Smart contracts for PoW Name Service - a decentralized naming system where domai
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         User / Miner                            │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-┌───────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ PoWNSRegistry │◄────│  PoWNSVerifier  │     │   BountyVault   │
-│   (ERC-721)   │     │    (SHA256)     │     │(Mining Bounties)│
-└───────┬───────┘     └─────────────────┘     └─────────────────┘
-        │
-        ├──────────────────────────────────────┐
-        ▼                                      ▼
-┌───────────────┐                    ┌─────────────────┐
-│PoWNSResolver  │                    │   POWNSToken    │
-│(Addr/Text/CID)│                    │    (ERC-20)     │
-└───────────────┘                    └────────┬────────┘
-                                              │
-        ┌─────────────────────────────────────┼─────────────────┐
-        ▼                                     ▼                 ▼
-┌───────────────┐                    ┌───────────────┐ ┌───────────────┐
-│  Marketplace  │                    │ POWNSStaking  │ │  TeamVesting  │
-│(Trade Domains)│                    │(Revenue Share)│ │(Team Tokens)  │
-└───────────────┘                    └───────┬───────┘ └───────────────┘
-                                             │
-                                             ▼
-                                    ┌─────────────────┐
-                                    │FeeDistributor   │
-                                    │50%/30%/20%      │
-                                    └─────────────────┘
+```mermaid
+graph TD
+    User[User / Miner] --> Registry[PoWNSRegistry]
+    User --> Bounty[BountyVault]
+    User --> Market[Marketplace]
+    User --> Token[POWNSToken]
+    User --> Staking[POWNSStaking]
+
+    Registry --> Verifier[PoWNSVerifier]
+    Registry --> Token
+
+    Bounty --> Registry
+    Bounty --> Token
+
+    Market --> Registry
+    Market --> Token
+    Market --> FeeDist[ProtocolFeeDistributor]
+
+    Resolver[PoWNSResolver] -.-> Registry
+
+    Staking --> Token
+    Staking --> FeeDist
+
+    FeeDist --> Staking
+    FeeDist --> DAO[DAO Treasury]
+    FeeDist --> Burn[0xdead]
+
+    Vesting[TeamVesting] --> Token
 ```
 
 ## Build
@@ -78,34 +75,6 @@ export RPC_URL=your_rpc_url
 
 # Deploy all contracts
 forge script script/Deploy.s.sol:DeployPoWNS --rpc-url $RPC_URL --broadcast
-```
-
-## Test Results
-
-```
-Running 20 tests
-✅ test_ComputeHash
-✅ test_DifficultyBits
-✅ test_DifficultyBitsCharset
-✅ test_DomainAuction
-✅ test_DomainExpired
-✅ test_DomainState
-✅ test_InitialState
-✅ test_InsufficientDeposit
-✅ test_NameValidation
-✅ test_RegisterDomain
-✅ test_RegisterMultipleYears
-✅ test_ReleaseDomain
-✅ test_Target
-✅ test_TransferDomain
-✅ test_ValidNameChars
-✅ test_VerifyPoW
-✅ test_VerifyPoWFails
-✅ test_CannotRegisterTwice
-✅ test_CannotReleaseIfNotOwner
-✅ test_CannotTransferIfNotOwner
-
-20 passed, 0 failed
 ```
 
 ## Token Economics
