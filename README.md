@@ -79,13 +79,14 @@ forge script script/Deploy.s.sol:DeployPoWNS --rpc-url $RPC_URL --broadcast
 
 ## Token Economics
 
-| Allocation         | Percentage | Amount |
-| ------------------ | ---------- | ------ |
-| PoW Mining         | 40%        | 400M   |
-| DAO Treasury       | 25%        | 250M   |
-| Team (4yr vest)    | 15%        | 150M   |
-| Early Contributors | 10%        | 100M   |
-| Liquidity          | 10%        | 100M   |
+```mermaid
+pie title Token Allocation
+    "PoW Mining (40%)" : 400000000
+    "DAO Treasury (25%)" : 250000000
+    "Team (15%)" : 150000000
+    "Early Contributors (10%)" : 100000000
+    "Liquidity (10%)" : 100000000
+```
 
 ## License
 
